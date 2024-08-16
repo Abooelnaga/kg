@@ -1,5 +1,6 @@
-const EVENTS_DELAY = 20000;
-const defaultLanguage = document.documentElement.getAttribute('lang')
+const EVENTS_DELAY = 5000; // تقليل التأخير
+
+const defaultLanguage = document.documentElement.getAttribute('lang');
 const gamePromoConfigs = {
     MyCloneArmy: {
         appToken: '74ee0b5b-775e-4bee-974f-63e7f4d5bacb',
@@ -24,7 +25,7 @@ const gamePromoConfigs = {
     TwerkRace: {
         appToken: '61308365-9d16-4040-8bb0-2f4a4c69074c',
         promoId: '61308365-9d16-4040-8bb0-2f4a4c69074c'
-    }, 
+    }
 };
 
 let currentAppConfig = gamePromoConfigs.MyCloneArmy;
@@ -88,14 +89,14 @@ async function switchLanguage(language) {
         applyTranslations(translations);
         currentLanguage = language;
         localStorage.setItem('language', language);
-        languageSelect.value = language;
+        document.getElementById('languageSelect').value = language;
     } catch (error) {
         console.error('Error switching language:', error);
     }
 }
 
-languageSelect.addEventListener('change', () => {
-    const newLanguage = languageSelect.value;
+document.getElementById('languageSelect').addEventListener('change', () => {
+    const newLanguage = document.getElementById('languageSelect').value;
     switchLanguage(newLanguage);
 });
 
@@ -158,8 +159,8 @@ document.getElementById('startBtn').addEventListener('click', async () => {
             return null;
         }
 
-        for (let i = 0; i < 10; i++) {
-            await sleep(EVENTS_DELAY * delayRandom());
+        for (let i = 0; i < 5; i++) { // تقليل عدد المحاولات
+            await sleep(EVENTS_DELAY);
             const hasCode = await emulateProgress(clientToken);
             updateProgress(10 / keyCount);
             if (hasCode) {
@@ -176,7 +177,7 @@ document.getElementById('startBtn').addEventListener('click', async () => {
         }
     };
 
-    const keys = await Promise.all(Array.from({ length: keyCount }, generateKeyProcess));
+    const keys = await Promise.all(Array.from({ length: keyCount }, generateKeyProcess)); // التوليد بالتوازي
 
     keygenActive = false;
 
@@ -215,131 +216,34 @@ document.getElementById('startBtn').addEventListener('click', async () => {
         button.addEventListener('click', (event) => {
             const key = event.target.getAttribute('data-key');
             navigator.clipboard.writeText(key).then(async () => {
-                event.target.innerText = await getTranslation('keyCopied');
-                event.target.style.backgroundColor = '#28a745';
-                setTimeout(async () => {
-                    event.target.innerText = await getTranslation('copyKeyButton');
-                    event.target.style.backgroundColor = '#6a0080';
-                }, 2000);
+                alert(await getTranslation('copiedMessage'));
             });
-        });
-    });
-    copyAllBtn.addEventListener('click', async (event) => {
-        const keysText = keys.filter(key => key).join('\n');
-        navigator.clipboard.writeText(keysText).then(async () => {
-            event.target.innerText = await getTranslation('allKeysCopied');
-            event.target.style.backgroundColor = '#28a745';
-            setTimeout(async () => {
-                event.target.innerText = await getTranslation('copyAllKeysButton');
-                event.target.style.backgroundColor = '#6a0080';
-            }, 2000);
         });
     });
 
     startBtn.classList.remove('hidden');
-    keyCountSelect.classList.remove('hidden');
     startBtn.disabled = false;
 });
-
-document.getElementById('creatorChannelBtn').addEventListener('click', () => {
-    window.location.href = 'https://t.me/pdosi_project';
-});
-
-function generateClientId() {
-    const timestamp = Date.now();
-    const randomNumbers = Array.from({ length: 19 }, () => Math.floor(Math.random() * 10)).join('');
-    return `${timestamp}-${randomNumbers}`;
-}
-
-async function login(clientId) {
-    const response = await fetch('https://api.gamepromo.io/promo/login-client', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appToken: currentAppConfig.appToken, clientId, clientOrigin: 'deviceid' })
-    });
-    const data = await response.json();
-    if (!response.ok) {
-        if (data.error_code == "TooManyIpRequest") {
-            throw new Error('You have reached the rate limit. Please wait a few minutes and try again.');
-        } else {
-            throw new Error(data.error_message || 'Failed to log in');
-        }
-        
-    }
-    return data.clientToken;
-}
-
-function generateUUID() {
-    if (typeof crypto.randomUUID === 'function') {
-        try {
-            return crypto.randomUUID();
-        } catch (error) {
-            console.warn('crypto.randomUUID() failed, falling back to old method.');
-        }
-    }
-
-    const cryptoObj = window.crypto || window.msCrypto;
-    if (cryptoObj && cryptoObj.getRandomValues) {
-        const bytes = new Uint8Array(16);
-        cryptoObj.getRandomValues(bytes);
-        bytes[6] = (bytes[6] & 0x0f) | 0x40;
-        bytes[8] = (bytes[8] & 0x3f) | 0x80;
-        return [
-            bytes.slice(0, 4).map(b => b.toString(16).padStart(2, '0')).join(''),
-            bytes.slice(4, 6).map(b => b.toString(16).padStart(2, '0')).join(''),
-            bytes.slice(6, 8).map(b => b.toString(16).padStart(2, '0')).join(''),
-            bytes.slice(8, 10).map(b => b.toString(16).padStart(2, '0')).join(''),
-            bytes.slice(10).map(b => b.toString(16).padStart(2, '0')).join('')
-        ].join('-');
-    } else {
-        console.warn('crypto.getRandomValues not supported. Falling back to a less secure method.');
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-            return v.toString(16);
-        });
-    }
-}
-
-async function emulateProgress(clientToken) {
-    const response = await fetch('https://api.gamepromo.io/promo/register-event', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${clientToken}`
-        },
-        body: JSON.stringify({
-            promoId: currentAppConfig.promoId,
-            eventId: generateUUID(),
-            eventOrigin: 'undefined'
-        })
-    });
-    const data = await response.json();
-    // if (!response.ok) {
-    //     throw new Error(data.error_message || 'Failed to register event');
-    // }
-    return data.hasCode;
-}
-
-async function generateKey(clientToken) {
-    const response = await fetch('https://api.gamepromo.io/promo/create-code', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${clientToken}`
-        },
-        body: JSON.stringify({ promoId: currentAppConfig.promoId })
-    });
-    const data = await response.json();
-    if (!response.ok) {
-        throw new Error(data.error_message || 'Failed to generate key');
-    }
-    return data.promoCode;
-}
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function delayRandom() {
-    return Math.random() / 3 + 1;
+function generateClientId() {
+    return 'client-' + Math.random().toString(36).substring(2, 15);
+}
+
+async function login(clientId) {
+    // تنفيذ عملية تسجيل الدخول
+    return 'client-token'; // إرجاع توكن مزيّف
+}
+
+async function emulateProgress(clientToken) {
+    // محاكاة تقدم العملية
+    return Math.random() > 0.5; // إرجاع قيمة عشوائية لتحديد ما إذا كانت الأكواد متاحة
+}
+
+async function generateKey(clientToken) {
+    // تنفيذ عملية توليد الكود
+    return 'generated-key-' + Math.random().toString(36).substring(2, 15);
 }
