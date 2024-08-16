@@ -1,4 +1,4 @@
-const EVENTS_DELAY = 60000;
+const EVENTS_DELAY = 20000;
 const defaultLanguage = document.documentElement.getAttribute('lang')
 const gamePromoConfigs = {
     MyCloneArmy: {
