@@ -49,9 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadTranslations(language) {
     try {
-        const response = await fetch(locales/${language}.json);
+        const response = await fetch(`locales/${language}.json`);
         if (!response.ok) {
-            throw new Error(Failed to load translations: ${response.statusText});
+            throw new Error(`Failed to load translations: ${response.statusText}`);
         }
         return await response.json();
     } catch (error) {
@@ -137,8 +137,8 @@ document.getElementById('startBtn').addEventListener('click', async () => {
             if (!keygenActive) return;
             if (step < steps) {
                 progress += stepIncrement;
-                progressBar.style.width = ${progress}%;
-                progressText.innerText = ${Math.round(progress)}%;
+                progressBar.style.width = `${progress}%`;
+                progressText.innerText = `${Math.round(progress)}%`;
                 step++;
                 setTimeout(increaseProgress, 2000 / steps + Math.random() * 1000);
             }
@@ -153,7 +153,7 @@ document.getElementById('startBtn').addEventListener('click', async () => {
         try {
             clientToken = await login(clientId);
         } catch (error) {
-            alert(Failed to log in: ${error.message});
+            alert(`Failed to log in: ${error.message}`);
             startBtn.disabled = false;
             return null;
         }
@@ -171,7 +171,7 @@ document.getElementById('startBtn').addEventListener('click', async () => {
             const key = await generateKey(clientToken);
             return key;
         } catch (error) {
-            alert(Failed to generate key: ${error.message});
+            alert(`Failed to generate key: ${error.message}`);
             return null;
         }
     };
@@ -186,25 +186,25 @@ document.getElementById('startBtn').addEventListener('click', async () => {
     if (keys.length > 1) {
         const keyItemsPromises = keys.filter(key => key).map(async (key, index) => {
             const copyKeyButtonText = await getTranslation('copyKeyButton');
-            return 
+            return `
                 <div class="key-item">
                     <div class="key-number">${index + 1}</div>
                     <input type="text" value="${key}" readonly>
                     <button class="copyKeyBtn copy-button" data-key="${key}">${copyKeyButtonText}</button>
                 </div>
-            ;
+            `;
         });
         const keyItemsHtml = await Promise.all(keyItemsPromises);
         keysList.innerHTML = keyItemsHtml.join('');
         copyAllBtn.classList.remove('hidden');
     } else if (keys.length === 1) {
-        keysList.innerHTML = 
+        keysList.innerHTML = `
             <div class="key-item">
                 <div class="key-number">1</div>
                 <input type="text" value="${keys[0]}" readonly>
                 <button class="copyKeyBtn copy-button" data-key="${keys[0]}">${await getTranslation('copyKeyButton')}</button>
             </div>
-        ;
+        `;
     }
 
     keyContainer.classList.remove('hidden');
@@ -248,7 +248,7 @@ document.getElementById('creatorChannelBtn').addEventListener('click', () => {
 function generateClientId() {
     const timestamp = Date.now();
     const randomNumbers = Array.from({ length: 19 }, () => Math.floor(Math.random() * 10)).join('');
-    return ${timestamp}-${randomNumbers};
+    return `${timestamp}-${randomNumbers}`;
 }
 
 async function login(clientId) {
@@ -305,7 +305,7 @@ async function emulateProgress(clientToken) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': Bearer ${clientToken}
+            'Authorization': `Bearer ${clientToken}`
         },
         body: JSON.stringify({
             promoId: currentAppConfig.promoId,
@@ -325,7 +325,7 @@ async function generateKey(clientToken) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': Bearer ${clientToken}
+            'Authorization': `Bearer ${clientToken}`
         },
         body: JSON.stringify({ promoId: currentAppConfig.promoId })
     });
