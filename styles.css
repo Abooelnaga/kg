@@ -223,15 +223,6 @@ select option {
     z-index: 3; /* تأكد من أن الـ z-index أعلى من جميع العناصر الأخرى */
 }
 
-#languageSelect {
-    background-color: #001400;
-    color: #0f0;
-    border: 1px solid #0f0;
-    border-radius: 4px;
-    padding: 5px;
-    font-size: large;
-    
-}
 
 #matrix {
     position: fixed;
