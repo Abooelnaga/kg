@@ -204,6 +204,22 @@ select option {
     font-weight: bold;
 }
 
+.language-selector {
+    position: relative;
+    top: 20px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#languageSelect {
+    background-color: #4b006e;
+    color: #e0b3ff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 5px;
+    font-size: large;
+}
+
 .footer-button {
     margin-top: 20px;
     background-color: #001400;
