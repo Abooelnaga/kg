@@ -1,4 +1,4 @@
-
+const defaultLanguage = document.documentElement.getAttribute('lang')
 const gamePromoConfigs = {
     MyCloneArmy: {
         appToken: '74ee0b5b-775e-4bee-974f-63e7f4d5bacb',
@@ -45,10 +45,18 @@ const gamePromoConfigs = {
 };
 
 let currentAppConfig = gamePromoConfigs.MyCloneArmy;
+var currentLanguage;
 var keygenActive = false;
 
 document.addEventListener('DOMContentLoaded', () => {
+    const languageSelect = document.getElementById('languageSelect');
     const gameSelect = document.getElementById('gameSelect');
+    const supportedLangs = Array.from(languageSelect.options).map(option => option.value);
+
+    const storedLang = localStorage.getItem('language');
+    const userLang = storedLang || navigator.language || navigator.userLanguage;
+    const defaultLang = supportedLangs.includes(userLang) ? userLang : defaultLanguage;
+    switchLanguage(defaultLang);
 
     gameSelect.addEventListener('change', () => {
         const selectedGame = gameSelect.value;
@@ -56,8 +64,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+async function loadTranslations(language) {
+    try {
+        const response = await fetch(`locales/${language}.json`);
+        if (!response.ok) {
+            throw new Error(`Failed to load translations: ${response.statusText}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error loading translations:', error);
+        alert('Failed to load translations. Check the console for details.');
+        throw error;
+    }
+}
 
 async function getTranslation(key) {
+    const translations = await loadTranslations(currentLanguage);
     return translations[key] || key;
 }
 
@@ -77,7 +99,22 @@ function applyTranslations(translations) {
     });
 }
 
+async function switchLanguage(language) {
+    try {
+        const translations = await loadTranslations(language);
+        applyTranslations(translations);
+        currentLanguage = language;
+        localStorage.setItem('language', language);
+        languageSelect.value = language;
+    } catch (error) {
+        console.error('Error switching language:', error);
+    }
+}
 
+languageSelect.addEventListener('change', () => {
+    const newLanguage = languageSelect.value;
+    switchLanguage(newLanguage);
+});
 
 document.getElementById('startBtn').addEventListener('click', async () => {
     const startBtn = document.getElementById('startBtn');
@@ -137,7 +174,7 @@ document.getElementById('startBtn').addEventListener('click', async () => {
             startBtn.disabled = false;
             return null;
         }
-
+        
         for (let i = 0; i < currentAppConfig.attemptsNumber; i++) {
             await sleep(currentAppConfig.eventsDelay * delayRandom());
             const hasCode = await emulateProgress(clientToken);
@@ -196,10 +233,10 @@ document.getElementById('startBtn').addEventListener('click', async () => {
             const key = event.target.getAttribute('data-key');
             navigator.clipboard.writeText(key).then(async () => {
                 event.target.innerText = await getTranslation('keyCopied');
-                event.target.style.backgroundColor = 'rgba(0, 20, 0, 0.8)';
+                event.target.style.backgroundColor = '#28a745';
                 setTimeout(async () => {
                     event.target.innerText = await getTranslation('copyKeyButton');
-                    event.target.style.backgroundColor = '#0f0';
+                    event.target.style.backgroundColor = '#6a0080';
                 }, 2000);
             });
         });
@@ -208,10 +245,10 @@ document.getElementById('startBtn').addEventListener('click', async () => {
         const keysText = keys.filter(key => key).join('\n');
         navigator.clipboard.writeText(keysText).then(async () => {
             event.target.innerText = await getTranslation('allKeysCopied');
-            event.target.style.backgroundColor = 'rgba(0, 20, 0, 0.8)';
+            event.target.style.backgroundColor = '#28a745';
             setTimeout(async () => {
                 event.target.innerText = await getTranslation('copyAllKeysButton');
-                event.target.style.backgroundColor = 'rgba(0, 20, 0, 0.8)';
+                event.target.style.backgroundColor = '#6a0080';
             }, 2000);
         });
     });
@@ -222,7 +259,7 @@ document.getElementById('startBtn').addEventListener('click', async () => {
 });
 
 document.getElementById('creatorChannelBtn').addEventListener('click', () => {
-    window.location.href = 'https://t.me/KeysGen';
+    window.location.href = 'https://t.me/pdosi_project';
 });
 
 function generateClientId() {
@@ -244,7 +281,7 @@ async function login(clientId) {
         } else {
             throw new Error(data.error_message || 'Failed to log in');
         }
-
+        
     }
     return data.clientToken;
 }
@@ -273,7 +310,7 @@ function generateUUID() {
         ].join('-');
     } else {
         console.warn('crypto.getRandomValues not supported. Falling back to a less secure method.');
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
             var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
@@ -323,45 +360,3 @@ function sleep(ms) {
 function delayRandom() {
     return Math.random() / 3 + 1;
 }
-
-
-const canvas = document.getElementById('matrix');
-const ctx = canvas.getContext('2d');
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
-const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const nums = '0123456789';
-
-const alphabet = katakana + latin + nums;
-
-const fontSize = 16;
-const columns = canvas.width / fontSize;
-
-const rainDrops = [];
-
-for (let x = 0; x < columns; x++) {
-    rainDrops[x] = 1;
-}
-
-const draw = () => {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = '#0F0';
-    ctx.font = fontSize + 'px monospace';
-
-    for (let i = 0; i < rainDrops.length; i++) {
-        const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-        ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
-
-        if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-            rainDrops[i] = 0;
-        }
-        rainDrops[i]++;
-    }
-};
-
-setInterval(draw, 30);
