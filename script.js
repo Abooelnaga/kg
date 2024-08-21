@@ -49,9 +49,7 @@ var currentLanguage;
 var keygenActive = false;
 
 document.addEventListener('DOMContentLoaded', () => {
-    const languageSelect = document.getElementById('languageSelect');
     const gameSelect = document.getElementById('gameSelect');
-    const supportedLangs = Array.from(languageSelect.options).map(option => option.value);
 
     const storedLang = localStorage.getItem('language');
     const userLang = storedLang || navigator.language || navigator.userLanguage;
@@ -99,22 +97,6 @@ function applyTranslations(translations) {
     });
 }
 
-async function switchLanguage(language) {
-    try {
-        const translations = await loadTranslations(language);
-        applyTranslations(translations);
-        currentLanguage = language;
-        localStorage.setItem('language', language);
-        languageSelect.value = language;
-    } catch (error) {
-        console.error('Error switching language:', error);
-    }
-}
-
-languageSelect.addEventListener('change', () => {
-    const newLanguage = languageSelect.value;
-    switchLanguage(newLanguage);
-});
 
 document.getElementById('startBtn').addEventListener('click', async () => {
     const startBtn = document.getElementById('startBtn');
