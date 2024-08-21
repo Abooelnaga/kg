@@ -1,4 +1,4 @@
-const defaultLanguage = document.documentElement.getAttribute('lang')
+
 const gamePromoConfigs = {
     MyCloneArmy: {
         appToken: '74ee0b5b-775e-4bee-974f-63e7f4d5bacb',
@@ -45,7 +45,6 @@ const gamePromoConfigs = {
 };
 
 let currentAppConfig = gamePromoConfigs.MyCloneArmy;
-var currentLanguage;
 var keygenActive = false;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -56,6 +55,28 @@ document.addEventListener('DOMContentLoaded', () => {
         currentAppConfig = gamePromoConfigs[selectedGame];
     });
 });
+
+
+async function getTranslation(key) {
+    return translations[key] || key;
+}
+
+function applyTranslations(translations) {
+    document.querySelector('h1').innerText = translations.title;
+    document.getElementById('keyCountLabel').innerText = keygenActive
+        ? translations.selectKeyCountLabel_selected + document.getElementById('keyCountSelect').value
+        : translations.selectKeyCountLabel;
+    document.getElementById('startBtn').innerText = translations.generateButton;
+    document.getElementById('generatedKeysTitle').innerText = translations.generatedKeysTitle;
+    document.getElementById('creatorChannelBtn').innerText = translations.footerButton;
+    document.getElementById('copyAllBtn').innerText = translations.copyAllKeysButton;
+    document.getElementById('gameSelectLabel').innerText = translations.selectGameLabel;
+
+    document.querySelectorAll('.copyKeyBtn').forEach(button => {
+        button.innerText = translations.copyKeyButton || 'Copy Key';
+    });
+}
+
 
 
 document.getElementById('startBtn').addEventListener('click', async () => {
@@ -79,6 +100,7 @@ document.getElementById('startBtn').addEventListener('click', async () => {
     generatedKeysTitle.classList.add('hidden');
     keysList.innerHTML = '';
     keyCountSelect.classList.add('hidden');
+    keyCountLabel.innerText = await getTranslation('selectKeyCountLabel_selected') + keyCount;
     startBtn.classList.add('hidden');
     copyAllBtn.classList.add('hidden');
     startBtn.disabled = true;
@@ -115,7 +137,7 @@ document.getElementById('startBtn').addEventListener('click', async () => {
             startBtn.disabled = false;
             return null;
         }
-        
+
         for (let i = 0; i < currentAppConfig.attemptsNumber; i++) {
             await sleep(currentAppConfig.eventsDelay * delayRandom());
             const hasCode = await emulateProgress(clientToken);
@@ -143,6 +165,7 @@ document.getElementById('startBtn').addEventListener('click', async () => {
 
     if (keys.length > 1) {
         const keyItemsPromises = keys.filter(key => key).map(async (key, index) => {
+            const copyKeyButtonText = await getTranslation('copyKeyButton');
             return `
                 <div class="key-item">
                     <div class="key-number">${index + 1}</div>
@@ -159,19 +182,23 @@ document.getElementById('startBtn').addEventListener('click', async () => {
             <div class="key-item">
                 <div class="key-number">1</div>
                 <input type="text" value="${keys[0]}" readonly>
+                <button class="copyKeyBtn copy-button" data-key="${keys[0]}">${await getTranslation('copyKeyButton')}</button>
             </div>
         `;
     }
 
     keyContainer.classList.remove('hidden');
     generatedKeysTitle.classList.remove('hidden');
+    keyCountLabel.innerText = await getTranslation('selectKeyCountLabel');
     document.getElementById("gameSelect").disabled = false;
     document.querySelectorAll('.copyKeyBtn').forEach(button => {
         button.addEventListener('click', (event) => {
             const key = event.target.getAttribute('data-key');
             navigator.clipboard.writeText(key).then(async () => {
+                event.target.innerText = await getTranslation('keyCopied');
                 event.target.style.backgroundColor = 'rgba(0, 20, 0, 0.8)';
                 setTimeout(async () => {
+                    event.target.innerText = await getTranslation('copyKeyButton');
                     event.target.style.backgroundColor = '#0f0';
                 }, 2000);
             });
@@ -180,8 +207,10 @@ document.getElementById('startBtn').addEventListener('click', async () => {
     copyAllBtn.addEventListener('click', async (event) => {
         const keysText = keys.filter(key => key).join('\n');
         navigator.clipboard.writeText(keysText).then(async () => {
+            event.target.innerText = await getTranslation('allKeysCopied');
             event.target.style.backgroundColor = 'rgba(0, 20, 0, 0.8)';
             setTimeout(async () => {
+                event.target.innerText = await getTranslation('copyAllKeysButton');
                 event.target.style.backgroundColor = 'rgba(0, 20, 0, 0.8)';
             }, 2000);
         });
@@ -215,7 +244,7 @@ async function login(clientId) {
         } else {
             throw new Error(data.error_message || 'Failed to log in');
         }
-        
+
     }
     return data.clientToken;
 }
@@ -244,7 +273,7 @@ function generateUUID() {
         ].join('-');
     } else {
         console.warn('crypto.getRandomValues not supported. Falling back to a less secure method.');
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
