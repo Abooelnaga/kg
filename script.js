@@ -51,11 +51,6 @@ var keygenActive = false;
 document.addEventListener('DOMContentLoaded', () => {
     const gameSelect = document.getElementById('gameSelect');
 
-    const storedLang = localStorage.getItem('language');
-    const userLang = storedLang || navigator.language || navigator.userLanguage;
-    const defaultLang = supportedLangs.includes(userLang) ? userLang : defaultLanguage;
-    switchLanguage(defaultLang);
-
     gameSelect.addEventListener('change', () => {
         const selectedGame = gameSelect.value;
         currentAppConfig = gamePromoConfigs[selectedGame];
