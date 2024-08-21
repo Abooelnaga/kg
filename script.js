@@ -233,10 +233,10 @@ document.getElementById('startBtn').addEventListener('click', async () => {
             const key = event.target.getAttribute('data-key');
             navigator.clipboard.writeText(key).then(async () => {
                 event.target.innerText = await getTranslation('keyCopied');
-                event.target.style.backgroundColor = '#28a745';
+                event.target.style.backgroundColor = 'rgba(0, 20, 0, 0.8)';
                 setTimeout(async () => {
                     event.target.innerText = await getTranslation('copyKeyButton');
-                    event.target.style.backgroundColor = '#6a0080';
+                    event.target.style.backgroundColor = '#0f0';
                 }, 2000);
             });
         });
@@ -245,10 +245,10 @@ document.getElementById('startBtn').addEventListener('click', async () => {
         const keysText = keys.filter(key => key).join('\n');
         navigator.clipboard.writeText(keysText).then(async () => {
             event.target.innerText = await getTranslation('allKeysCopied');
-            event.target.style.backgroundColor = '#28a745';
+            event.target.style.backgroundColor = 'rgba(0, 20, 0, 0.8)';
             setTimeout(async () => {
                 event.target.innerText = await getTranslation('copyAllKeysButton');
-                event.target.style.backgroundColor = '#6a0080';
+                event.target.style.backgroundColor = 'rgba(0, 20, 0, 0.8)';
             }, 2000);
         });
     });
@@ -259,7 +259,7 @@ document.getElementById('startBtn').addEventListener('click', async () => {
 });
 
 document.getElementById('creatorChannelBtn').addEventListener('click', () => {
-    window.location.href = 'https://t.me/pdosi_project';
+    window.location.href = 'https://t.me/KeysGen';
 });
 
 function generateClientId() {
