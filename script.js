@@ -79,7 +79,6 @@ document.getElementById('startBtn').addEventListener('click', async () => {
     generatedKeysTitle.classList.add('hidden');
     keysList.innerHTML = '';
     keyCountSelect.classList.add('hidden');
-    keyCountLabel.innerText = await getTranslation('selectKeyCountLabel_selected') + keyCount;
     startBtn.classList.add('hidden');
     copyAllBtn.classList.add('hidden');
     startBtn.disabled = true;
@@ -144,7 +143,6 @@ document.getElementById('startBtn').addEventListener('click', async () => {
 
     if (keys.length > 1) {
         const keyItemsPromises = keys.filter(key => key).map(async (key, index) => {
-            const copyKeyButtonText = await getTranslation('copyKeyButton');
             return `
                 <div class="key-item">
                     <div class="key-number">${index + 1}</div>
@@ -161,23 +159,19 @@ document.getElementById('startBtn').addEventListener('click', async () => {
             <div class="key-item">
                 <div class="key-number">1</div>
                 <input type="text" value="${keys[0]}" readonly>
-                <button class="copyKeyBtn copy-button" data-key="${keys[0]}">${await getTranslation('copyKeyButton')}</button>
             </div>
         `;
     }
 
     keyContainer.classList.remove('hidden');
     generatedKeysTitle.classList.remove('hidden');
-    keyCountLabel.innerText = await getTranslation('selectKeyCountLabel');
     document.getElementById("gameSelect").disabled = false;
     document.querySelectorAll('.copyKeyBtn').forEach(button => {
         button.addEventListener('click', (event) => {
             const key = event.target.getAttribute('data-key');
             navigator.clipboard.writeText(key).then(async () => {
-                event.target.innerText = await getTranslation('keyCopied');
                 event.target.style.backgroundColor = 'rgba(0, 20, 0, 0.8)';
                 setTimeout(async () => {
-                    event.target.innerText = await getTranslation('copyKeyButton');
                     event.target.style.backgroundColor = '#0f0';
                 }, 2000);
             });
@@ -186,10 +180,8 @@ document.getElementById('startBtn').addEventListener('click', async () => {
     copyAllBtn.addEventListener('click', async (event) => {
         const keysText = keys.filter(key => key).join('\n');
         navigator.clipboard.writeText(keysText).then(async () => {
-            event.target.innerText = await getTranslation('allKeysCopied');
             event.target.style.backgroundColor = 'rgba(0, 20, 0, 0.8)';
             setTimeout(async () => {
-                event.target.innerText = await getTranslation('copyAllKeysButton');
                 event.target.style.backgroundColor = 'rgba(0, 20, 0, 0.8)';
             }, 2000);
         });
