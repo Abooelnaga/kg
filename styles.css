@@ -249,3 +249,9 @@ select option {
         right: 10px;
     }
 }
+
+.footer {
+    margin-top: 25px;
+    font-size: 14px;
+    color: #777;
+}
